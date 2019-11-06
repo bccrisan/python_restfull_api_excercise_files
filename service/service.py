@@ -5,6 +5,7 @@ from models import NotificationModel
 from http_status import HttpStatus 
 from pytz import utc 
  
+
 class NotificationManager(): 
     last_id = 0 
     def __init__(self): 
@@ -21,6 +22,7 @@ class NotificationManager():
     def delete_notification(self, id): 
         del self.notifications[id] 
 
+
 notification_fields = { 
     'id': fields.Integer, 
     'uri': fields.Url('notification_endpoint'), 
@@ -32,14 +34,13 @@ notification_fields = {
     'displayed_once': fields.Boolean 
 } 
  
- 
-notification_manager = NotificationManager() 
 
 class Notification(Resource): 
     def abort_if_notification_not_found(self, id): 
         if id not in notification_manager.notifications: 
             abort( 
-                HttpStatus.not_found_404.value, message="Notification {0} doesn't exist".format(id)) 
+                HttpStatus.not_found_404.value, 
+                message="Notification {0} doesn't exist".format(id)) 
  
     @marshal_with(notification_fields)
     def get(self, id): 
@@ -73,6 +74,9 @@ class Notification(Resource):
         return notification 
 
 
+notification_manager = NotificationManager() 
+
+
 class NotificationList(Resource):
     @marshal_with(notification_fields)
     def get(self):
@@ -81,9 +85,11 @@ class NotificationList(Resource):
     @marshal_with(notification_fields)
     def post(self):
         parser = reqparse.RequestParser()
+
         parser.add_argument('message', type=str, required=True, help='Message cannot be blank!')
         parser.add_argument('ttl', type=int, required=True, help='Time to live cannot be blank!')
         parser.add_argument('notification_category', type=str, required=True, help='Notification category cannot be blank!')
+        
         args = parser.parse_args()
         notification = NotificationModel(
             message=args['message'],
